@@ -188,6 +188,7 @@ if $IS_WINDOWS_GIT_BASH; then
     echo "If the previous command was denied, it is not critical. Setting core.longpaths at the --system level is usually not necessary."
     # current user's repos
     git config --global core.longpaths true
+    git config --global core.ignorecase false
 fi
 
 # Check if this is WSL
