@@ -4,6 +4,19 @@
 
 # ? Reminder: Any installations that use a script and not apt-get install, should probably run every time to update (i.e. do no wrap in if ! is_command_available)
 
+echo "=============================================================================="
+echo " > Pulling latest .dotfiles "
+echo "=============================================================================="
+pull_output=$(yadm pull 2>&1)
+echo "$pull_output"
+
+# If changes were pulled, re-execute bootstrap with the updated version
+if ! echo "$pull_output" | grep -q 'Already up to date.'; then
+    echo "Changes pulled, re-executing bootstrap with updated version..."
+    exec "$BASH" "$HOME/.config/yadm/bootstrap"
+    exit 1  # This should never be reached, but ensures script stops if exec fails
+fi
+
 cd "$HOME" || { echo "Bootstrapping failed: Could not cd into $HOME"; exit 1; }
 
 echo "=============================================================================="
@@ -206,10 +219,15 @@ if $IS_WSL; then # https://www.reddit.com/r/bashonubuntuonwindows/comments/12jzd
     fi
 fi
 
+# Record the commit SHA that was just bootstrapped
+yadm log -1 --format="%H" > "$HOME/.last-yadm-bootstrap"
+
 # done
 echo "=============================================================================="
 echo " > Bootstrapping complete "
 echo "=============================================================================="
+
+
 echo "Reloading shell..."
 
 exec "$BASH"
